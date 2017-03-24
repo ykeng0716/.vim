@@ -1,0 +1,48 @@
+#!/usr/bin/env expect
+#
+# Read password from secret file to connect database automatically
+# Copyright (c) 2016 Gasol Wu <gasolwu@kkbox.com>, KKBOX Technologies.
+
+
+set mysql_cmd [exec which mysql]
+set db [lindex $argv 0]
+set dirs {$::env(HOME)/Code/kksecret /kkcorp/kksecret}
+foreach dir $dirs {
+    if {[file exists "$dir/db-$db/db.json"]} {
+        set secret_file "$dir/db-$db/db.json"
+        break
+    }
+}
+
+if {$db == "list"} {
+    foreach d [lsort [glob -type d $dir/db-*]] {
+        puts [string range [file tail $d] 3 end]
+    }
+    exit
+}
+
+if {[catch {package require json}]} {
+    set jq_cmd [exec which jq]
+    set jq_args -r
+    set host [exec cat $secret_file | $jq_cmd $jq_args {.[0].reader.params.host}]
+    set password [exec cat $secret_file | $jq_cmd $jq_args {.[0].reader.params.password}]
+    set username [exec cat $secret_file | $jq_cmd $jq_args {.[0].reader.params.username}]
+    set dbname [exec cat $secret_file | $jq_cmd $jq_args {.[0].reader.params.dbname}]
+} else {
+    set fp [open $secret_file r]
+    set data [read $fp]
+    close $fp
+    set json [::json::json2dict $data]
+    set first_entry [lindex $json 0]
+
+    set host [dict get $first_entry writer params host]
+    set password [dict get $first_entry writer params password]
+    set username [dict get $first_entry writer params username]
+    set dbname [dict get $first_entry writer params dbname]
+}
+
+spawn $mysql_cmd -h $host -u $username -p $dbname
+expect password
+send "$password\n"
+expect >
+interact
