@@ -1,0 +1,43 @@
+### rebind hotkey
+
+# prefix setting (screen-like)
+set -g prefix C-a
+unbind C-b
+bind C-a send-prefix
+
+# reload config without killing server
+bind R source-file ~/.tmux.conf \; display-message "Config reloaded..."
+
+# v --> "|" splits the current window vertically, and s --> "-" splits it horizontally
+unbind %
+bind | split-window -h
+bind - split-window -v
+
+# Pane navigation (vim-like)
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+
+# Pane resizing
+bind -r Left  resize-pane -L 4
+bind -r Down  resize-pane -D 4
+bind -r Up    resize-pane -U 4
+bind -r Right resize-pane -R 4
+
+# display things in 256 colors
+set -g default-terminal "screen-256color"
+
+# mouse is great!
+set-option -g mouse on
+
+# history size
+set -g history-limit 10000
+
+# fix delay
+set -g escape-time 0
+
+# 0 is too far
+set -g base-index 1
+setw -g pane-base-index 1
