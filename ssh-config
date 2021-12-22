@@ -1,0 +1,11 @@
+# 預設帳號 （個人帳號）
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_rsa_personal
+
+# 工作帳號
+Host work
+   HostName github.com
+   User git
+   IdentityFile ~/.ssh/id_rsa_work
